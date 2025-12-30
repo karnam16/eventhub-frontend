@@ -26,6 +26,7 @@ function Events() {
     fetchEvents();
   }, []);
 
+  /* JOIN EVENT */
   const joinEvent = async (eventId) => {
     try {
       await API.post(`/events/${eventId}/join`);
@@ -35,6 +36,17 @@ function Events() {
     }
   };
 
+  /* LEAVE EVENT */
+  const leaveEvent = async (eventId) => {
+    try {
+      await API.post(`/events/${eventId}/leave`);
+      fetchEvents();
+    } catch (err) {
+      alert(err.response?.data?.message || "Leave failed");
+    }
+  };
+
+  /* DELETE EVENT */
   const deleteEvent = async (eventId) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this event?"
@@ -53,7 +65,7 @@ function Events() {
     <div className="container">
       <h1>Events</h1>
 
-      {/* CREATE BUTTON */}
+      {/* CREATE EVENT BUTTON */}
       {!showCreate && !editingEvent && (
         <button
           style={{ marginBottom: "20px" }}
@@ -95,7 +107,7 @@ function Events() {
 
           return (
             <div className="card" key={event._id}>
-              {/* IMAGE */}
+              {/* EVENT IMAGE */}
               {event.imageUrl && (
                 <img
                   src={event.imageUrl}
@@ -130,15 +142,24 @@ function Events() {
                 <b>Attendees:</b> {event.attendees.length}/{event.capacity}
               </p>
 
-              {/* JOIN */}
-              <button
-                disabled={isJoined || isFull}
-                onClick={() => joinEvent(event._id)}
-              >
-                {isJoined ? "Joined" : isFull ? "Event Full" : "Join"}
-              </button>
+              {/* JOIN / LEAVE BUTTON */}
+              {isJoined ? (
+                <button
+                  className="danger"
+                  onClick={() => leaveEvent(event._id)}
+                >
+                  Leave
+                </button>
+              ) : (
+                <button
+                  disabled={isFull}
+                  onClick={() => joinEvent(event._id)}
+                >
+                  {isFull ? "Event Full" : "Join"}
+                </button>
+              )}
 
-              {/* EDIT / DELETE */}
+              {/* EDIT / DELETE (CREATOR ONLY) */}
               {isCreator && (
                 <>
                   <button
